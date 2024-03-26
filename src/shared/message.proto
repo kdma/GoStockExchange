@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package shared;
+option go_package = "./bindings";
+
+message ServerRequest {
+    oneof request {
+        OrderRequest order = 1;
+        ListRequest list = 2;
+    }
+}
+message Response{
+ oneof data {
+            OrderResponse order = 1;
+            ListResponse portfolio = 2;
+        }
+}
+message ServerResponse {
+    oneof result {
+        Response data = 1;
+        ErrorResponse error = 2;
+    }
+}
+
+message ErrorResponse {
+    bool was_successful = 1;
+    string error_message = 2;
+}
+
+message OrderRequest {
+    int32 price = 1;
+    string ticker = 2;
+    int32 orderType = 3;
+    int64 quantity = 4;
+}
+
+message OrderResponse{
+    uint64 id = 1;
+}
+
+message ListRequest {
+    string user = 1;
+}
+
+message ListResponse {
+    uint64 id = 1;
+}
