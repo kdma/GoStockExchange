@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.33.0
 // 	protoc        v5.26.0
-// source: message.proto
+// source: shared/message.proto
 
 package bindings
 
@@ -20,6 +20,52 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type OrderType int32
+
+const (
+	OrderType_Buy  OrderType = 0
+	OrderType_Sell OrderType = 1
+)
+
+// Enum value maps for OrderType.
+var (
+	OrderType_name = map[int32]string{
+		0: "Buy",
+		1: "Sell",
+	}
+	OrderType_value = map[string]int32{
+		"Buy":  0,
+		"Sell": 1,
+	}
+)
+
+func (x OrderType) Enum() *OrderType {
+	p := new(OrderType)
+	*p = x
+	return p
+}
+
+func (x OrderType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (OrderType) Descriptor() protoreflect.EnumDescriptor {
+	return file_shared_message_proto_enumTypes[0].Descriptor()
+}
+
+func (OrderType) Type() protoreflect.EnumType {
+	return &file_shared_message_proto_enumTypes[0]
+}
+
+func (x OrderType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use OrderType.Descriptor instead.
+func (OrderType) EnumDescriptor() ([]byte, []int) {
+	return file_shared_message_proto_rawDescGZIP(), []int{0}
+}
+
 type ServerRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -29,13 +75,14 @@ type ServerRequest struct {
 	//
 	//	*ServerRequest_Order
 	//	*ServerRequest_List
+	//	*ServerRequest_Tickers
 	Request isServerRequest_Request `protobuf_oneof:"request"`
 }
 
 func (x *ServerRequest) Reset() {
 	*x = ServerRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_message_proto_msgTypes[0]
+		mi := &file_shared_message_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -48,7 +95,7 @@ func (x *ServerRequest) String() string {
 func (*ServerRequest) ProtoMessage() {}
 
 func (x *ServerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_message_proto_msgTypes[0]
+	mi := &file_shared_message_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -61,7 +108,7 @@ func (x *ServerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServerRequest.ProtoReflect.Descriptor instead.
 func (*ServerRequest) Descriptor() ([]byte, []int) {
-	return file_message_proto_rawDescGZIP(), []int{0}
+	return file_shared_message_proto_rawDescGZIP(), []int{0}
 }
 
 func (m *ServerRequest) GetRequest() isServerRequest_Request {
@@ -85,6 +132,13 @@ func (x *ServerRequest) GetList() *ListRequest {
 	return nil
 }
 
+func (x *ServerRequest) GetTickers() *MarketRequest {
+	if x, ok := x.GetRequest().(*ServerRequest_Tickers); ok {
+		return x.Tickers
+	}
+	return nil
+}
+
 type isServerRequest_Request interface {
 	isServerRequest_Request()
 }
@@ -97,9 +151,15 @@ type ServerRequest_List struct {
 	List *ListRequest `protobuf:"bytes,2,opt,name=list,proto3,oneof"`
 }
 
+type ServerRequest_Tickers struct {
+	Tickers *MarketRequest `protobuf:"bytes,3,opt,name=tickers,proto3,oneof"`
+}
+
 func (*ServerRequest_Order) isServerRequest_Request() {}
 
 func (*ServerRequest_List) isServerRequest_Request() {}
+
+func (*ServerRequest_Tickers) isServerRequest_Request() {}
 
 type Response struct {
 	state         protoimpl.MessageState
@@ -110,13 +170,14 @@ type Response struct {
 	//
 	//	*Response_Order
 	//	*Response_Portfolio
+	//	*Response_Tickers
 	Data isResponse_Data `protobuf_oneof:"data"`
 }
 
 func (x *Response) Reset() {
 	*x = Response{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_message_proto_msgTypes[1]
+		mi := &file_shared_message_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -129,7 +190,7 @@ func (x *Response) String() string {
 func (*Response) ProtoMessage() {}
 
 func (x *Response) ProtoReflect() protoreflect.Message {
-	mi := &file_message_proto_msgTypes[1]
+	mi := &file_shared_message_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -142,7 +203,7 @@ func (x *Response) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Response.ProtoReflect.Descriptor instead.
 func (*Response) Descriptor() ([]byte, []int) {
-	return file_message_proto_rawDescGZIP(), []int{1}
+	return file_shared_message_proto_rawDescGZIP(), []int{1}
 }
 
 func (m *Response) GetData() isResponse_Data {
@@ -166,6 +227,13 @@ func (x *Response) GetPortfolio() *ListResponse {
 	return nil
 }
 
+func (x *Response) GetTickers() *MarketResponse {
+	if x, ok := x.GetData().(*Response_Tickers); ok {
+		return x.Tickers
+	}
+	return nil
+}
+
 type isResponse_Data interface {
 	isResponse_Data()
 }
@@ -178,15 +246,22 @@ type Response_Portfolio struct {
 	Portfolio *ListResponse `protobuf:"bytes,2,opt,name=portfolio,proto3,oneof"`
 }
 
+type Response_Tickers struct {
+	Tickers *MarketResponse `protobuf:"bytes,3,opt,name=tickers,proto3,oneof"`
+}
+
 func (*Response_Order) isResponse_Data() {}
 
 func (*Response_Portfolio) isResponse_Data() {}
+
+func (*Response_Tickers) isResponse_Data() {}
 
 type ServerResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	WasSuccessful bool `protobuf:"varint,1,opt,name=was_successful,json=wasSuccessful,proto3" json:"was_successful,omitempty"`
 	// Types that are assignable to Result:
 	//
 	//	*ServerResponse_Data
@@ -197,7 +272,7 @@ type ServerResponse struct {
 func (x *ServerResponse) Reset() {
 	*x = ServerResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_message_proto_msgTypes[2]
+		mi := &file_shared_message_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -210,7 +285,7 @@ func (x *ServerResponse) String() string {
 func (*ServerResponse) ProtoMessage() {}
 
 func (x *ServerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_message_proto_msgTypes[2]
+	mi := &file_shared_message_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -223,7 +298,14 @@ func (x *ServerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServerResponse.ProtoReflect.Descriptor instead.
 func (*ServerResponse) Descriptor() ([]byte, []int) {
-	return file_message_proto_rawDescGZIP(), []int{2}
+	return file_shared_message_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ServerResponse) GetWasSuccessful() bool {
+	if x != nil {
+		return x.WasSuccessful
+	}
+	return false
 }
 
 func (m *ServerResponse) GetResult() isServerResponse_Result {
@@ -252,11 +334,11 @@ type isServerResponse_Result interface {
 }
 
 type ServerResponse_Data struct {
-	Data *Response `protobuf:"bytes,1,opt,name=data,proto3,oneof"`
+	Data *Response `protobuf:"bytes,2,opt,name=data,proto3,oneof"`
 }
 
 type ServerResponse_Error struct {
-	Error *ErrorResponse `protobuf:"bytes,2,opt,name=error,proto3,oneof"`
+	Error *ErrorResponse `protobuf:"bytes,3,opt,name=error,proto3,oneof"`
 }
 
 func (*ServerResponse_Data) isServerResponse_Result() {}
@@ -268,14 +350,13 @@ type ErrorResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	WasSuccessful bool   `protobuf:"varint,1,opt,name=was_successful,json=wasSuccessful,proto3" json:"was_successful,omitempty"`
-	ErrorMessage  string `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	ErrorMessage string `protobuf:"bytes,1,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 }
 
 func (x *ErrorResponse) Reset() {
 	*x = ErrorResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_message_proto_msgTypes[3]
+		mi := &file_shared_message_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -288,7 +369,7 @@ func (x *ErrorResponse) String() string {
 func (*ErrorResponse) ProtoMessage() {}
 
 func (x *ErrorResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_message_proto_msgTypes[3]
+	mi := &file_shared_message_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -301,14 +382,7 @@ func (x *ErrorResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ErrorResponse.ProtoReflect.Descriptor instead.
 func (*ErrorResponse) Descriptor() ([]byte, []int) {
-	return file_message_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *ErrorResponse) GetWasSuccessful() bool {
-	if x != nil {
-		return x.WasSuccessful
-	}
-	return false
+	return file_shared_message_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ErrorResponse) GetErrorMessage() string {
@@ -323,16 +397,16 @@ type OrderRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Price     int32  `protobuf:"varint,1,opt,name=price,proto3" json:"price,omitempty"`
-	Ticker    string `protobuf:"bytes,2,opt,name=ticker,proto3" json:"ticker,omitempty"`
-	OrderType int32  `protobuf:"varint,3,opt,name=orderType,proto3" json:"orderType,omitempty"`
-	Quantity  int64  `protobuf:"varint,4,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	Price     float32   `protobuf:"fixed32,1,opt,name=price,proto3" json:"price,omitempty"`
+	Ticker    string    `protobuf:"bytes,2,opt,name=ticker,proto3" json:"ticker,omitempty"`
+	OrderType OrderType `protobuf:"varint,3,opt,name=orderType,proto3,enum=shared.OrderType" json:"orderType,omitempty"`
+	Quantity  int32     `protobuf:"varint,4,opt,name=quantity,proto3" json:"quantity,omitempty"`
 }
 
 func (x *OrderRequest) Reset() {
 	*x = OrderRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_message_proto_msgTypes[4]
+		mi := &file_shared_message_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -345,7 +419,7 @@ func (x *OrderRequest) String() string {
 func (*OrderRequest) ProtoMessage() {}
 
 func (x *OrderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_message_proto_msgTypes[4]
+	mi := &file_shared_message_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -358,10 +432,10 @@ func (x *OrderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OrderRequest.ProtoReflect.Descriptor instead.
 func (*OrderRequest) Descriptor() ([]byte, []int) {
-	return file_message_proto_rawDescGZIP(), []int{4}
+	return file_shared_message_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *OrderRequest) GetPrice() int32 {
+func (x *OrderRequest) GetPrice() float32 {
 	if x != nil {
 		return x.Price
 	}
@@ -375,14 +449,14 @@ func (x *OrderRequest) GetTicker() string {
 	return ""
 }
 
-func (x *OrderRequest) GetOrderType() int32 {
+func (x *OrderRequest) GetOrderType() OrderType {
 	if x != nil {
 		return x.OrderType
 	}
-	return 0
+	return OrderType_Buy
 }
 
-func (x *OrderRequest) GetQuantity() int64 {
+func (x *OrderRequest) GetQuantity() int32 {
 	if x != nil {
 		return x.Quantity
 	}
@@ -394,13 +468,13 @@ type OrderResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *OrderResponse) Reset() {
 	*x = OrderResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_message_proto_msgTypes[5]
+		mi := &file_shared_message_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -413,7 +487,7 @@ func (x *OrderResponse) String() string {
 func (*OrderResponse) ProtoMessage() {}
 
 func (x *OrderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_message_proto_msgTypes[5]
+	mi := &file_shared_message_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -426,14 +500,14 @@ func (x *OrderResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OrderResponse.ProtoReflect.Descriptor instead.
 func (*OrderResponse) Descriptor() ([]byte, []int) {
-	return file_message_proto_rawDescGZIP(), []int{5}
+	return file_shared_message_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *OrderResponse) GetId() uint64 {
+func (x *OrderResponse) GetId() string {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return ""
 }
 
 type ListRequest struct {
@@ -447,7 +521,7 @@ type ListRequest struct {
 func (x *ListRequest) Reset() {
 	*x = ListRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_message_proto_msgTypes[6]
+		mi := &file_shared_message_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -460,7 +534,7 @@ func (x *ListRequest) String() string {
 func (*ListRequest) ProtoMessage() {}
 
 func (x *ListRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_message_proto_msgTypes[6]
+	mi := &file_shared_message_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -473,7 +547,7 @@ func (x *ListRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListRequest.ProtoReflect.Descriptor instead.
 func (*ListRequest) Descriptor() ([]byte, []int) {
-	return file_message_proto_rawDescGZIP(), []int{6}
+	return file_shared_message_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ListRequest) GetUser() string {
@@ -494,7 +568,7 @@ type ListResponse struct {
 func (x *ListResponse) Reset() {
 	*x = ListResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_message_proto_msgTypes[7]
+		mi := &file_shared_message_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -507,7 +581,7 @@ func (x *ListResponse) String() string {
 func (*ListResponse) ProtoMessage() {}
 
 func (x *ListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_message_proto_msgTypes[7]
+	mi := &file_shared_message_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -520,7 +594,7 @@ func (x *ListResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListResponse.ProtoReflect.Descriptor instead.
 func (*ListResponse) Descriptor() ([]byte, []int) {
-	return file_message_proto_rawDescGZIP(), []int{7}
+	return file_shared_message_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ListResponse) GetId() uint64 {
@@ -530,100 +604,206 @@ func (x *ListResponse) GetId() uint64 {
 	return 0
 }
 
-var File_message_proto protoreflect.FileDescriptor
+type MarketRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
 
-var file_message_proto_rawDesc = []byte{
-	0x0a, 0x0d, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12,
-	0x06, 0x73, 0x68, 0x61, 0x72, 0x65, 0x64, 0x22, 0x73, 0x0a, 0x0d, 0x53, 0x65, 0x72, 0x76, 0x65,
-	0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x2c, 0x0a, 0x05, 0x6f, 0x72, 0x64, 0x65,
-	0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x73, 0x68, 0x61, 0x72, 0x65, 0x64,
-	0x2e, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x48, 0x00, 0x52,
-	0x05, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x12, 0x29, 0x0a, 0x04, 0x6c, 0x69, 0x73, 0x74, 0x18, 0x02,
-	0x20, 0x01, 0x28, 0x0b, 0x32, 0x13, 0x2e, 0x73, 0x68, 0x61, 0x72, 0x65, 0x64, 0x2e, 0x4c, 0x69,
-	0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x48, 0x00, 0x52, 0x04, 0x6c, 0x69, 0x73,
-	0x74, 0x42, 0x09, 0x0a, 0x07, 0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x77, 0x0a, 0x08,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x2d, 0x0a, 0x05, 0x6f, 0x72, 0x64, 0x65,
-	0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x15, 0x2e, 0x73, 0x68, 0x61, 0x72, 0x65, 0x64,
-	0x2e, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x48, 0x00,
-	0x52, 0x05, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x12, 0x34, 0x0a, 0x09, 0x70, 0x6f, 0x72, 0x74, 0x66,
-	0x6f, 0x6c, 0x69, 0x6f, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x73, 0x68, 0x61,
-	0x72, 0x65, 0x64, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x48, 0x00, 0x52, 0x09, 0x70, 0x6f, 0x72, 0x74, 0x66, 0x6f, 0x6c, 0x69, 0x6f, 0x42, 0x06, 0x0a,
-	0x04, 0x64, 0x61, 0x74, 0x61, 0x22, 0x71, 0x0a, 0x0e, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x26, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x73, 0x68, 0x61, 0x72, 0x65, 0x64, 0x2e, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x48, 0x00, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x12,
-	0x2d, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x15,
-	0x2e, 0x73, 0x68, 0x61, 0x72, 0x65, 0x64, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x52, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x48, 0x00, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x42, 0x08,
-	0x0a, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x5b, 0x0a, 0x0d, 0x45, 0x72, 0x72, 0x6f,
-	0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x25, 0x0a, 0x0e, 0x77, 0x61, 0x73,
-	0x5f, 0x73, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x66, 0x75, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28,
-	0x08, 0x52, 0x0d, 0x77, 0x61, 0x73, 0x53, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x66, 0x75, 0x6c,
-	0x12, 0x23, 0x0a, 0x0d, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x5f, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67,
-	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x4d, 0x65,
-	0x73, 0x73, 0x61, 0x67, 0x65, 0x22, 0x76, 0x0a, 0x0c, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x70, 0x72, 0x69, 0x63, 0x65, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x70, 0x72, 0x69, 0x63, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x74,
-	0x69, 0x63, 0x6b, 0x65, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x74, 0x69, 0x63,
-	0x6b, 0x65, 0x72, 0x12, 0x1c, 0x0a, 0x09, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x54, 0x79, 0x70, 0x65,
-	0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x09, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x54, 0x79, 0x70,
-	0x65, 0x12, 0x1a, 0x0a, 0x08, 0x71, 0x75, 0x61, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x18, 0x04, 0x20,
-	0x01, 0x28, 0x03, 0x52, 0x08, 0x71, 0x75, 0x61, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x22, 0x1f, 0x0a,
-	0x0d, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0e,
-	0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x22, 0x21,
-	0x0a, 0x0b, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x12, 0x0a,
-	0x04, 0x75, 0x73, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x75, 0x73, 0x65,
-	0x72, 0x22, 0x1e, 0x0a, 0x0c, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
-	0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69,
-	0x64, 0x42, 0x0c, 0x5a, 0x0a, 0x2e, 0x2f, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x73, 0x62,
+func (x *MarketRequest) Reset() {
+	*x = MarketRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_shared_message_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *MarketRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MarketRequest) ProtoMessage() {}
+
+func (x *MarketRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_shared_message_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MarketRequest.ProtoReflect.Descriptor instead.
+func (*MarketRequest) Descriptor() ([]byte, []int) {
+	return file_shared_message_proto_rawDescGZIP(), []int{8}
+}
+
+type MarketResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Ticker []string `protobuf:"bytes,1,rep,name=Ticker,proto3" json:"Ticker,omitempty"`
+}
+
+func (x *MarketResponse) Reset() {
+	*x = MarketResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_shared_message_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *MarketResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MarketResponse) ProtoMessage() {}
+
+func (x *MarketResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_shared_message_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MarketResponse.ProtoReflect.Descriptor instead.
+func (*MarketResponse) Descriptor() ([]byte, []int) {
+	return file_shared_message_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *MarketResponse) GetTicker() []string {
+	if x != nil {
+		return x.Ticker
+	}
+	return nil
+}
+
+var File_shared_message_proto protoreflect.FileDescriptor
+
+var file_shared_message_proto_rawDesc = []byte{
+	0x0a, 0x14, 0x73, 0x68, 0x61, 0x72, 0x65, 0x64, 0x2f, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x06, 0x73, 0x68, 0x61, 0x72, 0x65, 0x64, 0x22, 0xa6,
+	0x01, 0x0a, 0x0d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x12, 0x2c, 0x0a, 0x05, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x14, 0x2e, 0x73, 0x68, 0x61, 0x72, 0x65, 0x64, 0x2e, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x48, 0x00, 0x52, 0x05, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x12, 0x29,
+	0x0a, 0x04, 0x6c, 0x69, 0x73, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x13, 0x2e, 0x73,
+	0x68, 0x61, 0x72, 0x65, 0x64, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x48, 0x00, 0x52, 0x04, 0x6c, 0x69, 0x73, 0x74, 0x12, 0x31, 0x0a, 0x07, 0x74, 0x69, 0x63,
+	0x6b, 0x65, 0x72, 0x73, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x15, 0x2e, 0x73, 0x68, 0x61,
+	0x72, 0x65, 0x64, 0x2e, 0x4d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x48, 0x00, 0x52, 0x07, 0x74, 0x69, 0x63, 0x6b, 0x65, 0x72, 0x73, 0x42, 0x09, 0x0a, 0x07,
+	0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0xab, 0x01, 0x0a, 0x08, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x2d, 0x0a, 0x05, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x15, 0x2e, 0x73, 0x68, 0x61, 0x72, 0x65, 0x64, 0x2e, 0x4f, 0x72, 0x64,
+	0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x48, 0x00, 0x52, 0x05, 0x6f, 0x72,
+	0x64, 0x65, 0x72, 0x12, 0x34, 0x0a, 0x09, 0x70, 0x6f, 0x72, 0x74, 0x66, 0x6f, 0x6c, 0x69, 0x6f,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x73, 0x68, 0x61, 0x72, 0x65, 0x64, 0x2e,
+	0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x48, 0x00, 0x52, 0x09,
+	0x70, 0x6f, 0x72, 0x74, 0x66, 0x6f, 0x6c, 0x69, 0x6f, 0x12, 0x32, 0x0a, 0x07, 0x74, 0x69, 0x63,
+	0x6b, 0x65, 0x72, 0x73, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x16, 0x2e, 0x73, 0x68, 0x61,
+	0x72, 0x65, 0x64, 0x2e, 0x4d, 0x61, 0x72, 0x6b, 0x65, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x48, 0x00, 0x52, 0x07, 0x74, 0x69, 0x63, 0x6b, 0x65, 0x72, 0x73, 0x42, 0x06, 0x0a,
+	0x04, 0x64, 0x61, 0x74, 0x61, 0x22, 0x98, 0x01, 0x0a, 0x0e, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x25, 0x0a, 0x0e, 0x77, 0x61, 0x73, 0x5f,
+	0x73, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x66, 0x75, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08,
+	0x52, 0x0d, 0x77, 0x61, 0x73, 0x53, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x66, 0x75, 0x6c, 0x12,
+	0x26, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x10, 0x2e,
+	0x73, 0x68, 0x61, 0x72, 0x65, 0x64, 0x2e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x48,
+	0x00, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x12, 0x2d, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x15, 0x2e, 0x73, 0x68, 0x61, 0x72, 0x65, 0x64, 0x2e,
+	0x45, 0x72, 0x72, 0x6f, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x48, 0x00, 0x52,
+	0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x42, 0x08, 0x0a, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74,
+	0x22, 0x34, 0x0a, 0x0d, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x12, 0x23, 0x0a, 0x0d, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x5f, 0x6d, 0x65, 0x73, 0x73, 0x61,
+	0x67, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x4d,
+	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x22, 0x89, 0x01, 0x0a, 0x0c, 0x4f, 0x72, 0x64, 0x65, 0x72,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x70, 0x72, 0x69, 0x63, 0x65,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x02, 0x52, 0x05, 0x70, 0x72, 0x69, 0x63, 0x65, 0x12, 0x16, 0x0a,
+	0x06, 0x74, 0x69, 0x63, 0x6b, 0x65, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x74,
+	0x69, 0x63, 0x6b, 0x65, 0x72, 0x12, 0x2f, 0x0a, 0x09, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x54, 0x79,
+	0x70, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x11, 0x2e, 0x73, 0x68, 0x61, 0x72, 0x65,
+	0x64, 0x2e, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x54, 0x79, 0x70, 0x65, 0x52, 0x09, 0x6f, 0x72, 0x64,
+	0x65, 0x72, 0x54, 0x79, 0x70, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x71, 0x75, 0x61, 0x6e, 0x74, 0x69,
+	0x74, 0x79, 0x18, 0x04, 0x20, 0x01, 0x28, 0x05, 0x52, 0x08, 0x71, 0x75, 0x61, 0x6e, 0x74, 0x69,
+	0x74, 0x79, 0x22, 0x1f, 0x0a, 0x0d, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x02, 0x69, 0x64, 0x22, 0x21, 0x0a, 0x0b, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x75, 0x73, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x04, 0x75, 0x73, 0x65, 0x72, 0x22, 0x1e, 0x0a, 0x0c, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x22, 0x0f, 0x0a, 0x0d, 0x4d, 0x61, 0x72, 0x6b, 0x65, 0x74,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x28, 0x0a, 0x0e, 0x4d, 0x61, 0x72, 0x6b, 0x65,
+	0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x54, 0x69, 0x63,
+	0x6b, 0x65, 0x72, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x06, 0x54, 0x69, 0x63, 0x6b, 0x65,
+	0x72, 0x2a, 0x1e, 0x0a, 0x09, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x54, 0x79, 0x70, 0x65, 0x12, 0x07,
+	0x0a, 0x03, 0x42, 0x75, 0x79, 0x10, 0x00, 0x12, 0x08, 0x0a, 0x04, 0x53, 0x65, 0x6c, 0x6c, 0x10,
+	0x01, 0x42, 0x0c, 0x5a, 0x0a, 0x2e, 0x2f, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x73, 0x62,
 	0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
-	file_message_proto_rawDescOnce sync.Once
-	file_message_proto_rawDescData = file_message_proto_rawDesc
+	file_shared_message_proto_rawDescOnce sync.Once
+	file_shared_message_proto_rawDescData = file_shared_message_proto_rawDesc
 )
 
-func file_message_proto_rawDescGZIP() []byte {
-	file_message_proto_rawDescOnce.Do(func() {
-		file_message_proto_rawDescData = protoimpl.X.CompressGZIP(file_message_proto_rawDescData)
+func file_shared_message_proto_rawDescGZIP() []byte {
+	file_shared_message_proto_rawDescOnce.Do(func() {
+		file_shared_message_proto_rawDescData = protoimpl.X.CompressGZIP(file_shared_message_proto_rawDescData)
 	})
-	return file_message_proto_rawDescData
+	return file_shared_message_proto_rawDescData
 }
 
-var file_message_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
-var file_message_proto_goTypes = []interface{}{
-	(*ServerRequest)(nil),  // 0: shared.ServerRequest
-	(*Response)(nil),       // 1: shared.Response
-	(*ServerResponse)(nil), // 2: shared.ServerResponse
-	(*ErrorResponse)(nil),  // 3: shared.ErrorResponse
-	(*OrderRequest)(nil),   // 4: shared.OrderRequest
-	(*OrderResponse)(nil),  // 5: shared.OrderResponse
-	(*ListRequest)(nil),    // 6: shared.ListRequest
-	(*ListResponse)(nil),   // 7: shared.ListResponse
+var file_shared_message_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_shared_message_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_shared_message_proto_goTypes = []interface{}{
+	(OrderType)(0),         // 0: shared.OrderType
+	(*ServerRequest)(nil),  // 1: shared.ServerRequest
+	(*Response)(nil),       // 2: shared.Response
+	(*ServerResponse)(nil), // 3: shared.ServerResponse
+	(*ErrorResponse)(nil),  // 4: shared.ErrorResponse
+	(*OrderRequest)(nil),   // 5: shared.OrderRequest
+	(*OrderResponse)(nil),  // 6: shared.OrderResponse
+	(*ListRequest)(nil),    // 7: shared.ListRequest
+	(*ListResponse)(nil),   // 8: shared.ListResponse
+	(*MarketRequest)(nil),  // 9: shared.MarketRequest
+	(*MarketResponse)(nil), // 10: shared.MarketResponse
 }
-var file_message_proto_depIdxs = []int32{
-	4, // 0: shared.ServerRequest.order:type_name -> shared.OrderRequest
-	6, // 1: shared.ServerRequest.list:type_name -> shared.ListRequest
-	5, // 2: shared.Response.order:type_name -> shared.OrderResponse
-	7, // 3: shared.Response.portfolio:type_name -> shared.ListResponse
-	1, // 4: shared.ServerResponse.data:type_name -> shared.Response
-	3, // 5: shared.ServerResponse.error:type_name -> shared.ErrorResponse
-	6, // [6:6] is the sub-list for method output_type
-	6, // [6:6] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+var file_shared_message_proto_depIdxs = []int32{
+	5,  // 0: shared.ServerRequest.order:type_name -> shared.OrderRequest
+	7,  // 1: shared.ServerRequest.list:type_name -> shared.ListRequest
+	9,  // 2: shared.ServerRequest.tickers:type_name -> shared.MarketRequest
+	6,  // 3: shared.Response.order:type_name -> shared.OrderResponse
+	8,  // 4: shared.Response.portfolio:type_name -> shared.ListResponse
+	10, // 5: shared.Response.tickers:type_name -> shared.MarketResponse
+	2,  // 6: shared.ServerResponse.data:type_name -> shared.Response
+	4,  // 7: shared.ServerResponse.error:type_name -> shared.ErrorResponse
+	0,  // 8: shared.OrderRequest.orderType:type_name -> shared.OrderType
+	9,  // [9:9] is the sub-list for method output_type
+	9,  // [9:9] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
-func init() { file_message_proto_init() }
-func file_message_proto_init() {
-	if File_message_proto != nil {
+func init() { file_shared_message_proto_init() }
+func file_shared_message_proto_init() {
+	if File_shared_message_proto != nil {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_message_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_shared_message_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ServerRequest); i {
 			case 0:
 				return &v.state
@@ -635,7 +815,7 @@ func file_message_proto_init() {
 				return nil
 			}
 		}
-		file_message_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_shared_message_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Response); i {
 			case 0:
 				return &v.state
@@ -647,7 +827,7 @@ func file_message_proto_init() {
 				return nil
 			}
 		}
-		file_message_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+		file_shared_message_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ServerResponse); i {
 			case 0:
 				return &v.state
@@ -659,7 +839,7 @@ func file_message_proto_init() {
 				return nil
 			}
 		}
-		file_message_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+		file_shared_message_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ErrorResponse); i {
 			case 0:
 				return &v.state
@@ -671,7 +851,7 @@ func file_message_proto_init() {
 				return nil
 			}
 		}
-		file_message_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+		file_shared_message_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*OrderRequest); i {
 			case 0:
 				return &v.state
@@ -683,7 +863,7 @@ func file_message_proto_init() {
 				return nil
 			}
 		}
-		file_message_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+		file_shared_message_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*OrderResponse); i {
 			case 0:
 				return &v.state
@@ -695,7 +875,7 @@ func file_message_proto_init() {
 				return nil
 			}
 		}
-		file_message_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+		file_shared_message_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ListRequest); i {
 			case 0:
 				return &v.state
@@ -707,7 +887,7 @@ func file_message_proto_init() {
 				return nil
 			}
 		}
-		file_message_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+		file_shared_message_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ListResponse); i {
 			case 0:
 				return &v.state
@@ -719,16 +899,42 @@ func file_message_proto_init() {
 				return nil
 			}
 		}
+		file_shared_message_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*MarketRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_shared_message_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*MarketResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
-	file_message_proto_msgTypes[0].OneofWrappers = []interface{}{
+	file_shared_message_proto_msgTypes[0].OneofWrappers = []interface{}{
 		(*ServerRequest_Order)(nil),
 		(*ServerRequest_List)(nil),
+		(*ServerRequest_Tickers)(nil),
 	}
-	file_message_proto_msgTypes[1].OneofWrappers = []interface{}{
+	file_shared_message_proto_msgTypes[1].OneofWrappers = []interface{}{
 		(*Response_Order)(nil),
 		(*Response_Portfolio)(nil),
+		(*Response_Tickers)(nil),
 	}
-	file_message_proto_msgTypes[2].OneofWrappers = []interface{}{
+	file_shared_message_proto_msgTypes[2].OneofWrappers = []interface{}{
 		(*ServerResponse_Data)(nil),
 		(*ServerResponse_Error)(nil),
 	}
@@ -736,18 +942,19 @@ func file_message_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: file_message_proto_rawDesc,
-			NumEnums:      0,
-			NumMessages:   8,
+			RawDescriptor: file_shared_message_proto_rawDesc,
+			NumEnums:      1,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_message_proto_goTypes,
-		DependencyIndexes: file_message_proto_depIdxs,
-		MessageInfos:      file_message_proto_msgTypes,
+		GoTypes:           file_shared_message_proto_goTypes,
+		DependencyIndexes: file_shared_message_proto_depIdxs,
+		EnumInfos:         file_shared_message_proto_enumTypes,
+		MessageInfos:      file_shared_message_proto_msgTypes,
 	}.Build()
-	File_message_proto = out.File
-	file_message_proto_rawDesc = nil
-	file_message_proto_goTypes = nil
-	file_message_proto_depIdxs = nil
+	File_shared_message_proto = out.File
+	file_shared_message_proto_rawDesc = nil
+	file_shared_message_proto_goTypes = nil
+	file_shared_message_proto_depIdxs = nil
 }

@@ -1,8 +1,10 @@
-package server
+package main
 
 import (
 	"fmt"
 	"net"
+	"server_exchange/server/pkg"
+
 	"server_exchange/shared/bindings"
 
 	"github.com/google/uuid"
@@ -11,17 +13,17 @@ import (
 
 func main() {
 
-	l, err := net.Listen("tcp4", "9032")
+	l, err := net.Listen("tcp4", "localhost:9032")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	defer l.Close()
 
-	tickers := []Ticker{TSLA, NVDA, META, GOOG}
+	tickers := []pkg.Ticker{pkg.TSLA, pkg.NVDA, pkg.META, pkg.GOOG}
 
-	treasury := NewTreasury()
-	orderProcessor := NewOrderProcessor()
+	treasury := pkg.NewTreasury()
+	orderProcessor := pkg.NewOrderProcessor()
 	orderProcessor.Process(tickers)
 
 	for {
@@ -36,7 +38,7 @@ func main() {
 	}
 }
 
-func clientHandler(c net.Conn, acc *Portfolio, op *OrderProcessor) {
+func clientHandler(c net.Conn, acc *pkg.Portfolio, op *pkg.OrderProcessor) {
 	defer c.Close()
 
 	for {
@@ -48,41 +50,24 @@ func clientHandler(c net.Conn, acc *Portfolio, op *OrderProcessor) {
 		if err != nil {
 			order := serverRequest.GetOrder()
 			if order != nil {
-				orderDto := &OrderDto{
+				orderDto := &pkg.OrderDto{
 					Id:        uuid.New(),
 					Quantity:  int64(order.Quantity),
-					Ticker:    Ticker(order.Ticker),
-					Price:     Currency(order.Price),
-					OrderType: OrderType(order.OrderType),
+					Ticker:    pkg.Ticker(order.Ticker),
+					Price:     pkg.Currency(order.Price),
+					OrderType: pkg.OrderType(order.OrderType),
 				}
 
 				_, err := acc.TryMakeTrade(orderDto)
 				if err == nil {
-					op.Ingress <- &CustomerOrder{
+					op.Ingress <- &pkg.CustomerOrder{
 						CustomerId: acc.Id,
 						OrderDto:   orderDto,
 					}
 				}
+				//send a response
 			}
 
 		}
 	}
 }
-
-type CustomerOrder struct {
-	CustomerId uuid.UUID
-	OrderDto   *OrderDto
-}
-type OrderDto struct {
-	Id        uuid.UUID
-	Ticker    Ticker
-	Price     Currency
-	Quantity  int64
-	OrderType OrderType
-}
-type OrderType int
-
-const (
-	Buy  OrderType = 0
-	Sell OrderType = 1
-)

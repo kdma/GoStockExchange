@@ -1,4 +1,4 @@
-package server
+package pkg
 
 type Trade struct {
 	Ticker    Ticker

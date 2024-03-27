@@ -1,4 +1,4 @@
-package server
+package pkg
 
 type MarketMaker struct {
 	LimitBook *LimitBook
@@ -23,10 +23,20 @@ func (m *MarketMaker) trade(t Ticker) {
 		bids := m.LimitBook.Bids[t]
 		asks := m.LimitBook.Asks[t]
 
-		maxBid := bids.Max().(LimitTrade)
-		minAsk := asks.Min().(LimitTrade)
+		var maxBid *LimitTrade
+		var minAsk *LimitTrade
 
-		if maxBid.Trade.Price >= minAsk.Trade.Price {
+		if bids.Max() != nil {
+			bid := bids.Max().(LimitTrade)
+			maxBid = &bid
+		}
+
+		if bids.Min() != nil {
+			bid := asks.Min().(LimitTrade)
+			minAsk = &bid
+		}
+
+		if maxBid != nil && minAsk != nil && maxBid.Trade.Price >= minAsk.Trade.Price {
 
 			if maxBid.Trade.Quantity == minAsk.Trade.Quantity {
 

@@ -7,35 +7,45 @@ message ServerRequest {
     oneof request {
         OrderRequest order = 1;
         ListRequest list = 2;
+        MarketRequest tickers = 3;
     }
 }
+
 message Response{
- oneof data {
+        oneof data {
             OrderResponse order = 1;
             ListResponse portfolio = 2;
+            MarketResponse tickers = 3;
         }
 }
+
 message ServerResponse {
+    bool was_successful = 1;
+
     oneof result {
-        Response data = 1;
-        ErrorResponse error = 2;
+        Response data = 2;
+        ErrorResponse error = 3;
     }
 }
 
 message ErrorResponse {
-    bool was_successful = 1;
-    string error_message = 2;
+    string error_message = 1;
+}
+
+enum OrderType {
+    Buy = 0;
+    Sell = 1;
 }
 
 message OrderRequest {
-    int32 price = 1;
+    float price = 1;
     string ticker = 2;
-    int32 orderType = 3;
-    int64 quantity = 4;
+    OrderType orderType = 3;
+    int32 quantity = 4;
 }
 
 message OrderResponse{
-    uint64 id = 1;
+    string id = 1;
 }
 
 message ListRequest {
@@ -44,4 +54,11 @@ message ListRequest {
 
 message ListResponse {
     uint64 id = 1;
+}
+
+message MarketRequest{
+}
+
+message MarketResponse{
+    repeated string Ticker = 1;
 }

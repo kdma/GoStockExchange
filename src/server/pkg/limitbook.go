@@ -1,4 +1,4 @@
-package server
+package pkg
 
 import (
 	"sync"
@@ -71,23 +71,23 @@ func (l LimitBook) Init(t []Ticker) {
 
 }
 
-func (book *LimitBook) FillBid(t LimitTrade) {
+func (book *LimitBook) FillBid(t *LimitTrade) {
 	ticker := t.Trade.Ticker
 	book.WriteLocks[ticker].Lock()
 	defer book.WriteLocks[ticker].Unlock()
 	book.Bids[ticker].Delete(t)
-	book.OrderProcessor.Egress <- &t
+	book.OrderProcessor.Egress <- t
 }
 
-func (book *LimitBook) FillAsk(t LimitTrade) {
+func (book *LimitBook) FillAsk(t *LimitTrade) {
 	ticker := t.Trade.Ticker
 	book.WriteLocks[ticker].Lock()
 	defer book.WriteLocks[ticker].Unlock()
 	book.Asks[ticker].Delete(t)
-	book.OrderProcessor.Egress <- &t
+	book.OrderProcessor.Egress <- t
 }
 
-func (book *LimitBook) PartialFill(t LimitTrade, taken int64) {
+func (book *LimitBook) PartialFill(t *LimitTrade, taken int64) {
 	ticker := t.Trade.Ticker
 	book.WriteLocks[ticker].Lock()
 	defer book.WriteLocks[ticker].Unlock()
