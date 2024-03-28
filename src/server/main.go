@@ -5,10 +5,7 @@ import (
 	"net"
 	"server_exchange/server/pkg"
 
-	"server_exchange/shared/bindings"
-
 	"github.com/google/uuid"
-	"google.golang.org/protobuf/proto"
 )
 
 func main() {
@@ -20,11 +17,9 @@ func main() {
 	}
 	defer l.Close()
 
-	tickers := []pkg.Ticker{pkg.TSLA, pkg.NVDA, pkg.META, pkg.GOOG}
-
 	treasury := pkg.NewTreasury()
 	orderProcessor := pkg.NewOrderProcessor()
-	orderProcessor.Process(tickers)
+	orderProcessor.Process([]pkg.Ticker{pkg.TSLA, pkg.NVDA, pkg.META, pkg.GOOG})
 
 	for {
 		c, err := l.Accept()
@@ -34,40 +29,9 @@ func main() {
 		}
 		uId := uuid.New()
 		treasury.AddCustomer(uId)
-		go clientHandler(c, treasury.GetCustomer(uId), orderProcessor)
-	}
-}
-
-func clientHandler(c net.Conn, acc *pkg.Portfolio, op *pkg.OrderProcessor) {
-	defer c.Close()
-
-	for {
-
-		buf := make([]byte, 1024)
-		serverRequest := bindings.ServerRequest{}
-		err := proto.Unmarshal(buf, &serverRequest)
-
-		if err != nil {
-			order := serverRequest.GetOrder()
-			if order != nil {
-				orderDto := &pkg.OrderDto{
-					Id:        uuid.New(),
-					Quantity:  int64(order.Quantity),
-					Ticker:    pkg.Ticker(order.Ticker),
-					Price:     pkg.Currency(order.Price),
-					OrderType: pkg.OrderType(order.OrderType),
-				}
-
-				_, err := acc.TryMakeTrade(orderDto)
-				if err == nil {
-					op.Ingress <- &pkg.CustomerOrder{
-						CustomerId: acc.Id,
-						OrderDto:   orderDto,
-					}
-				}
-				//send a response
-			}
-
+		gateway := &pkg.Gateway{
+			Conn: c,
 		}
+		go gateway.Handle(treasury.GetCustomer(uId), orderProcessor)
 	}
 }

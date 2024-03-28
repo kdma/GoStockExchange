@@ -4,7 +4,11 @@ import (
 	"github.com/google/uuid"
 )
 
-type Currency int64
+type Currency float32
+
+func ToCurrency(cents float32) Currency {
+	return Currency(cents) / Cent
+}
 
 const (
 	Cent Currency = 100

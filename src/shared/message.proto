@@ -10,24 +10,21 @@ message ServerRequest {
         MarketRequest tickers = 3;
     }
 }
+message ServerResponse {
+    bool was_successful = 1;
 
+    oneof result {
+        Response response = 2;
+        ErrorResponse error = 3;
+    }
+}
 message Response{
-        oneof data {
+        oneof response {
             OrderResponse order = 1;
             ListResponse portfolio = 2;
             MarketResponse tickers = 3;
         }
 }
-
-message ServerResponse {
-    bool was_successful = 1;
-
-    oneof result {
-        Response data = 2;
-        ErrorResponse error = 3;
-    }
-}
-
 message ErrorResponse {
     string error_message = 1;
 }

@@ -29,15 +29,18 @@ func main() {
 		}
 
 		switch ctx.Command() {
-		case "mkt":
-			handleResponse(server.Market(&pkg.CLI))
+
 		case "buy <ticker> <price> <quantity>":
 			handleResponse(server.Buy(&pkg.CLI))
 		case "sell <ticker> <price> <quantity>":
 			handleResponse(server.Sell(&pkg.CLI))
 		case "list":
 			handleResponse(server.List(&pkg.CLI))
+		case "mkt":
+			handleResponse(server.Market(&pkg.CLI))
+
 		default:
+			fmt.Println(ctx.Error)
 		}
 	}
 }
@@ -47,7 +50,7 @@ func handleResponse(e error, res *bindings.ServerResponse) {
 		fmt.Println(e.Error())
 	} else {
 		if res.WasSuccessful {
-			fmt.Print(json.Marshal(*res.GetData()))
+			fmt.Print(json.Marshal(*res.GetResponse()))
 		} else {
 			fmt.Print(json.Marshal(*res.GetError()))
 		}
